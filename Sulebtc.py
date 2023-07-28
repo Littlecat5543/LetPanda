@@ -19,7 +19,8 @@ def generate_bitcoin_address(private_key):
     ripemd160_hash.update(sha256_hash)
     hashed_public_key = ripemd160_hash.digest()
     versioned_hashed_public_key = b"\x00" + hashed_public_key
-    checksum = hashlib.sha256(hashlib.sha256(versioned_hashed_public_key).digest()).dig>
+    checksum = hashlib.sha256(hashlib.sha256(versioned_hashed_public_key).digest()).digest()
+    
     binary_address = versioned_hashed_public_key + checksum
     bitcoin_address = base58.b58encode(binary_address).decode()
     return bitcoin_address
