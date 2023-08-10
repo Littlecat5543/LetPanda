@@ -43,8 +43,8 @@ def generate_private_key_range(start, end, given_address):
             return
 
 
-given_address = "13zb1hQbWVsc2S7ZTZnP2G4undNNpdh5so"
-start_range = 0x20000000009999999
-end_range = 0x3FFFFFFFFFFFFFFFF
+given_address = "1M8s2S5bgAzSSzVTeL7zruvMPLvzSkEAuv"
+start_range = 0x800000000000
+end_range = 0x10000000000000
 
 generate_private_key_range(start_range, end_range, given_address)
