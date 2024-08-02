@@ -1,0 +1,40 @@
+import hashlib
+import base58
+from ecdsa import SigningKey, SECP256k1
+from multiprocessing import Pool, cpu_count
+
+def generate_address(private_key_int):
+    private_key = private_key_int.to_bytes(32, 'big')
+    public_key = SigningKey.from_string(private_key, curve=SECP256k1).get_verifying_key().to_string('compressed')
+    ripemd160 = hashlib.new('ripemd160', hashlib.sha256(public_key).digest()).digest()
+    address = b'\x00' + ripemd160
+    checksum = hashlib.sha256(hashlib.sha256(address).digest()).digest()[:4]
+    return base58.b58encode(address + checksum).decode()
+
+def process_chunk(args):
+    start, end, target = args
+    for i in range(start, end):
+        if generate_address(i) == target:
+            return hex(i)[2:].zfill(64)
+    return None
+
+def parallel_search(start, end, target, chunk_size=10**6):
+    with Pool(cpu_count()) as pool:
+        chunks = [(i, min(i + chunk_size, end), target) for i in range(start, end, chunk_size)]
+        for result in pool.imap_unordered(process_chunk, chunks):
+            if result:
+                pool.terminate()
+                return result
+    return None
+
+if __name__ == "__main__":
+    target_address = "13zb1hQbWVsc2S7ZTZnP2G4undNNpdh5so"
+    start_range = 0x20000000000000000
+    end_range = 0x3ffffffffffffffff
+
+    result = parallel_search(start_range, end_range, target_address)
+    
+    if result:
+        print(f"Private Key Found: {result}")
+    else:
+        print("Private Key not found in the given range.")
